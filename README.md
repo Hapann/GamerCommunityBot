@@ -1,0 +1,2 @@
+# GamerCommunityBot
+GamerCommunityBot for news
