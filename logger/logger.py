@@ -8,7 +8,7 @@ LOG_FILE = LOG_DIR / "bot.log"
 
 # Настройка логгера
 logger = logging.getLogger("gamer_bot")
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 # Формат вывода
 formatter = logging.Formatter(
