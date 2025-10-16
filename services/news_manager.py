@@ -1,4 +1,4 @@
-# bot/services/news_manager.py
+# services/news_manager.py
 from database.db import AsyncSessionLocal
 from database.models import News, Feed
 from services.rss_reader import get_all_rss_news

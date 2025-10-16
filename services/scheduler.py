@@ -1,4 +1,4 @@
-# bot/services/scheduler.py
+# services/scheduler.py
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from services.news_manager import collect_and_save_news
 from services.sender import send_new_news

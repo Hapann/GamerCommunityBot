@@ -1,4 +1,4 @@
-# bot/database/models.py
+# database/models.py
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
