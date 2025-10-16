@@ -14,6 +14,7 @@ class User(Base):
 
     sent_news = relationship("SentNews", back_populates="user")
 
+
 class Feed(Base):
     __tablename__ = "feeds"
 
@@ -22,6 +23,7 @@ class Feed(Base):
     url = Column(Text, unique=True, nullable=False)
     type = Column(String, nullable=False)  # rss/api/parser
 
+
 class News(Base):
     __tablename__ = "news"
 
@@ -29,10 +31,13 @@ class News(Base):
     title = Column(String, nullable=False)
     url = Column(Text, unique=True, nullable=False)
     source_id = Column(ForeignKey("feeds.id"))
-    published_at = Column(DateTime, default=datetime.utcnow)
+
+    # 🕓 Дата публикации из RSS
+    published_at = Column(DateTime, nullable=False)
 
     source = relationship("Feed")
     sent_to = relationship("SentNews", back_populates="news")
+
 
 class SentNews(Base):
     __tablename__ = "sent_news"
@@ -42,7 +47,9 @@ class SentNews(Base):
     news_id = Column(ForeignKey("news.id"))
     sent_at = Column(DateTime, default=datetime.utcnow)
 
-    __table_args__ = (UniqueConstraint("user_id", "news_id", name="unique_user_news"),)
+    __table_args__ = (
+        UniqueConstraint("user_id", "news_id", name="unique_user_news"),
+    )
 
     user = relationship("User", back_populates="sent_news")
     news = relationship("News", back_populates="sent_to")

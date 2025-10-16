@@ -91,7 +91,8 @@ async def send_to_group_test(message: Message, bot: Bot):
             chat_id=CHAT_ID,
             message_thread_id=TOPIC_ID,
             text=test_text,
-            parse_mode="HTML"
+            parse_mode="HTML",
+            disable_web_page_preview=True
         )
 
         await message.answer("✅ Тестовое сообщение отправлено в группу!")
@@ -106,9 +107,9 @@ async def send_to_group_test(message: Message, bot: Bot):
 async def check_env_vars(message: Message):
     """Проверяет переменные окружения."""
     env_info = (
-        f"🔍 <b>Проверка переменных окружения:</b>\n"
-        f"CHAT_ID: {CHAT_ID} (тип: {type(CHAT_ID)})\n"
-        f"TOPIC_ID: {TOPIC_ID} (тип: {type(TOPIC_ID)})\n"
+        "🔍 <b>Проверка переменных окружения:</b>\n"
+        f"CHAT_ID: {CHAT_ID} (тип: {type(CHAT_ID).__name__})\n"
+        f"TOPIC_ID: {TOPIC_ID} (тип: {type(TOPIC_ID).__name__})\n"
         f"TOKEN установлен: {'Да' if os.getenv('TOKEN') else 'Нет'}"
     )
 

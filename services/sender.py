@@ -1,14 +1,17 @@
 # services/sender.py
 import os
 import asyncio
+from datetime import datetime
+import dateutil.parser
+
 from aiogram import Bot
 from sqlalchemy import select
-from datetime import datetime
 
 from database.db import AsyncSessionLocal
 from database.models import News, SentNews
-from services.rss_reader import get_all_rss_news  # подключаем твой ридер
+from services.rss_reader import get_all_rss_news  # твой модуль чтения RSS
 
+# --- Конфигурация окружения ---
 BOT_TOKEN = os.getenv("TOKEN")
 CHAT_ID = int(os.getenv("CHAT_ID"))
 TOPIC_ID = os.getenv("TOPIC_ID")
@@ -16,25 +19,41 @@ TOPIC_ID = int(TOPIC_ID) if TOPIC_ID else None
 
 bot = Bot(token=BOT_TOKEN)
 
+
+# --- Вспомогательные функции ---
+def to_datetime_safe(value):
+    """Пробует конвертировать дату RSS в datetime; если не выходит — берёт текущее время."""
+    try:
+        if not value:
+            return datetime.utcnow()
+        return dateutil.parser.parse(value)
+    except Exception:
+        return datetime.utcnow()
+
+
+# --- Основная логика ---
 async def sync_rss_to_db():
-    """Парсит RSS и сохраняет новые новости в базу."""
+    """Загружает новости из RSS и сохраняет только новые записи в базу."""
     news_list = await get_all_rss_news()
     new_count = 0
 
     async with AsyncSessionLocal() as session:
         for item in news_list:
-            # Проверяем, есть ли уже такая новость по URL
             stmt = select(News).where(News.url == item["link"])
             result = await session.execute(stmt)
             exists = result.scalar_one_or_none()
             if exists:
-                continue  # уже есть, пропускаем
+                continue  # такая новость уже есть
+
+            # достаём дату публикации из RSS
+            published_at = to_datetime_safe(item.get("published") or item.get("updated"))
 
             news = News(
                 title=item["title"],
                 url=item["link"],
-                created_at=datetime.utcnow(),
+                published_at=published_at,
             )
+
             session.add(news)
             new_count += 1
 
@@ -43,9 +62,13 @@ async def sync_rss_to_db():
     print(f"📰 Добавлено {new_count} новых новостей в базу.")
     return new_count
 
+
 async def send_new_news():
-    """Отправляет свежие новости в Telegram-группу и отмечает их как отправленные."""
-    # Сначала синхронизация RSS → DB
+    """
+    Отправляет новости, которые ещё не были разосланы, и отмечает их как отправленные.
+    Предпросмотр ссылок отключён.
+    """
+    # сначала подхватываем новые записи из RSS
     await sync_rss_to_db()
 
     async with AsyncSessionLocal() as session:
@@ -72,18 +95,27 @@ async def send_new_news():
                         message_thread_id=TOPIC_ID,
                         text=text,
                         parse_mode="HTML",
+                        disable_web_page_preview=True,  # 👈 без предпросмотра
                     )
                 else:
-                    await bot.send_message(chat_id=CHAT_ID, text=text, parse_mode="HTML")
+                    await bot.send_message(
+                        chat_id=CHAT_ID,
+                        text=text,
+                        parse_mode="HTML",
+                        disable_web_page_preview=True,
+                    )
 
-                await asyncio.sleep(1)
+                await asyncio.sleep(1)  # лёгкая пауза, чтобы не заспамить Telegram API
 
                 sent = SentNews(
-                    user_id=None, news_id=news.id, sent_at=datetime.utcnow()
+                    user_id=None,
+                    news_id=news.id,
+                    sent_at=datetime.utcnow(),
                 )
                 session.add(sent)
+
             except Exception as e:
-                print(f"Ошибка отправки новости ({news.url}): {e}")
+                print(f"❌ Ошибка отправки новости ({news.url}): {e}")
 
         await session.commit()
         print("✅ Отправка завершена.")

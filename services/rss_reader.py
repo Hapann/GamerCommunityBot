@@ -6,9 +6,6 @@ from datetime import datetime
 from logger.logger import logger
 
 RSS_FEEDS = [
-    "https://news.yandex.ru/index.rss",
-    "https://habr.com/ru/rss/all/all/?fl=ru",
-    "https://lenta.ru/rss/news",
     "https://www.goha.ru/rss/news"
 ]
 
