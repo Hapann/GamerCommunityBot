@@ -6,8 +6,17 @@ from datetime import datetime
 from logger.logger import logger
 
 RSS_FEEDS = [
-    "https://www.goha.ru/rss/news"
+    "https://www.goha.ru/rss/news",
+    "https://www.playground.ru/rss/news.xml",
+    "https://dtf.ru/rss/all"
 ]
+#https://www.gamedeveloper.com/rss.xml - eng
+#https://www.uploadvr.com/feed/ - eng
+#https://www.roadtovr.com/feed/ - eng
+#https://www.polygon.com/feed/ - eng
+#https://www.pcgamer.com/rss/ - eng
+#https://www.gamespot.com/feeds/news/ - eng
+#https://kotaku.com/feed - eng
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
