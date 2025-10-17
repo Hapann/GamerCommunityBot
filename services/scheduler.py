@@ -10,7 +10,7 @@ async def scheduled_job():
 def setup_scheduler():
     scheduler = AsyncIOScheduler(timezone="UTC")
     # 🔹 Запускать задачу каждые 15 минут
-    scheduler.add_job(scheduled_job, "interval", minutes=3, id="news_collector")
+    scheduler.add_job(scheduled_job, "interval", minutes=11, id="news_collector")
     scheduler.start()
-    print("🔁 Планировщик запущен: сбор и рассылка новостей каждые 15 минут.")
+    print("🔁 Планировщик запущен: сбор и рассылка новостей каждые 11 минут.")
     return scheduler
